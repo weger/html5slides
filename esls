@@ -1,0 +1,144 @@
+[33mcommit 4e0f14a2bf450812e8aec4ee2d3cad70ddb94f92[m
+Author: weger <lovexctk@gmail.com>
+Date:   Wed Jul 16 23:56:07 2014 +0800
+
+    Initialization
+
+[1mdiff --git a/images/colorbar.png b/images/colorbar.png[m
+[1mnew file mode 100644[m
+[1mindex 0000000..189af7a[m
+Binary files /dev/null and b/images/colorbar.png differ
+[1mdiff --git a/images/google-logo-small.png b/images/google-logo-small.png[m
+[1mnew file mode 100644[m
+[1mindex 0000000..56acd63[m
+Binary files /dev/null and b/images/google-logo-small.png differ
+[1mdiff --git a/images/google-logo.png b/images/google-logo.png[m
+[1mnew file mode 100644[m
+[1mindex 0000000..09a5215[m
+Binary files /dev/null and b/images/google-logo.png differ
+[1mdiff --git a/images/googleio-logo.png b/images/googleio-logo.png[m
+[1mnew file mode 100644[m
+[1mindex 0000000..ee0ed7d[m
+Binary files /dev/null and b/images/googleio-logo.png differ
+[1mdiff --git a/prettify.js b/prettify.js[m
+[1mnew file mode 100644[m
+[1mindex 0000000..4381669[m
+[1m--- /dev/null[m
+[1m+++ b/prettify.js[m
+[36m@@ -0,0 +1,1391 @@[m
+[32m+[m[32m// Copyright (C) 2006 Google Inc.[m
+[32m+[m[32m//[m
+[32m+[m[32m// Licensed under the Apache License, Version 2.0 (the "License");[m
+[32m+[m[32m// you may not use this file except in compliance with the License.[m
+[32m+[m[32m// You may obtain a copy of the License at[m
+[32m+[m[32m//[m
+[32m+[m[32m//      http://www.apache.org/licenses/LICENSE-2.0[m
+[32m+[m[32m//[m
+[32m+[m[32m// Unless required by applicable law or agreed to in writing, software[m
+[32m+[m[32m// distributed under the License is distributed on an "AS IS" BASIS,[m
+[32m+[m[32m// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.[m
+[32m+[m[32m// See the License for the specific language governing permissions and[m
+[32m+[m[32m// limitations under the License.[m
+[32m+[m
+[32m+[m
+[32m+[m[32m/**[m
+[32m+[m[32m * @fileoverview[m
+[32m+[m[32m * some functions for browser-side pretty printing of code contained in html.[m
+[32m+[m[32m *[m
+[32m+[m[32m * <p>[m
+[32m+[m[32m * For a fairly comprehensive set of languages see the[m
+[32m+[m[32m * <a href="http://google-code-prettify.googlecode.com/svn/trunk/README.html#langs">README</a>[m
+[32m+[m[32m * file that came with this source.  At a minimum, the lexer should work on a[m
+[32m+[m[32m * number of languages including C and friends, Java, Python, Bash, SQL, HTML,[m
+[32m+[m[32m * XML, CSS, Javascript, and Makefiles.  It works passably on Ruby, PHP and Awk[m
+[32m+[m[32m * and a subset of Perl, but, because of commenting conventions, doesn't work on[m
+[32m+[m[32m * Smalltalk, Lisp-like, or CAML-like languages without an explicit lang class.[m
+[32m+[m[32m * <p>[m
+[32m+[m[32m * Usage: <ol>[m
+[32m+[m[32m * <li> include this source file in an html page via[m
+[32m+[m[32m *   {@code <script type="text/javascript" src="/path/to/prettify.js"></script>}[m
+[32m+[m[32m * <li> define style rules.  See the example page for examples.[m
+[32m+[m[32m * <li> mark the {@code <pre>} and {@code <code>} tags in your source with[m
+[32m+[m[32m *    {@code class=prettyprint.}[m
+[32m+[m[32m *    You can also use the (html deprecated) {@code <xmp>} tag, but the pretty[m
+[32m+[m[32m *    printer needs to do more substantial DOM manipulations to support that, so[m
+[32m+[m[32m *    some css styles may not be preserved.[m
+[32m+[m[32m * </ol>[m
+[32m+[m[32m * That's it.  I wanted to keep the API as simple as possible, so there's no[m
+[32m+[m[32m * need to specify which language the code is in, but if you wish, you can add[m
+[32m+[m[32m * another class to the {@code <pre>} or {@code <code>} element to specify the[m
+[32m+[m[32m * language, as in {@code <pre class="prettyprint lang-java">}.  Any class that[m
+[32m+[m[32m * starts with "lang-" followed by a file extension, specifies the file type.[m
+[32m+[m[32m * See the "lang-*.js" files in this directory for code that implements[m
+[32m+[m[32m * per-language file handlers.[m
+[32m+[m[32m * <p>[m
+[32m+[m[32m * Change log:<br>[m
+[32m+[m[32m * cbeust, 2006/08/22[m
+[32m+[m[32m * <blockquote>[m
+[32m+[m[32m *   Java annotations (start with "@") are now captured as literals ("lit")[m
+[32m+[m[32m * </blockquote>[m
+[32m+[m[32m * @requires console[m
+[32m+[m[32m */[m
+[32m+[m
+[32m+[m[32m// JSLint declarations[m
+[32m+[m[32m/*global console, document, navigator, setTimeout, window */[m
+[32m+[m
+[32m+[m[32m/**[m
+[32m+[m[32m * Split {@code prettyPrint} into multiple timeouts so as not to interfere with[m
+[32m+[m[32m * UI events.[m
+[32m+[m[32m * If set to {@code false}, {@code prettyPrint()} is synchronous.[m
+[32m+[m[32m */[m
+[32m+[m[32mwindow['PR_SHOULD_USE_CONTINUATION'] = true;[m
+[32m+[m
+[32m+[m[32m/** the number of characters between tab columns */[m
+[32m+[m[32mwindow['PR_TAB_WIDTH'] = 8;[m
+[32m+[m
+[32m+[m[32m/** Contains functions for creating and registering new language handlers.[m
+[32m+[m[32m  * @type {Object}[m
+[32m+[m[32m  */[m
+[32m+[m[32mwindow['PR'][m
+[32m+[m
+[32m+[m[32m/** Pretty print a chunk of code.[m
+[32m+[m[32m  *[m
+[32m+[m[32m  * @param {string} sourceCodeHtml code as html[m
+[32m+[m[32m  * @return {string} code as html, but prettier[m
+[32m+[m[32m  */[m
+[32m+[m[32m  = window['prettyPrintOne'][m
+[32m+[m[32m/** Find all the {@code <pre>} and {@code <code>} tags in the DOM with[m
+[32m+[m[32m  * {@code class=prettyprint} and prettify them.[m
+[32m+[m[32m  * @param {Function?} opt_whenDone if specified, called when the last entry[m
+[32m+[m[32m  *     has been finished.[m
+[32m+[m[32m  */[m
+[32m+[m[32m  = window['prettyPrint'] = void 0;[m
+[32m+[m
+[32m+[m
+[32m+[m[32m(function () {[m
+[32m+[m[32m  // Keyword lists for various languages.[m
+[32m+[m[32m  var FLOW_CONTROL_KEYWORDS =[m
+[32m+[m[32m      "break continue do else for if return while ";[m
+[32m+[m[32m  var C_KEYWORDS = FLOW_CONTROL_KEYWORDS + "auto case char const default " +[m
+[32m+[m[32m      "double enum extern float goto int long register short signed sizeof " +[m
+[32m+[m[32m      "static struct switch typedef union unsigned void volatile ";[m
+[32m+[m[32m  var COMMON_KEYWORDS = C_KEYWORDS + "catch class delete false import " +[m
+[32m+[m[32m      "new operator private protected public this throw true try typeof ";[m
+[32m+[m[32m  var CPP_KEYWORDS = COMMON_KEYWORDS + "alignof align_union asm axiom bool " +[m
+[32m+[m[32m      "concept concept_map const_cast constexpr decltype " +[m
+[32m+[m[32m      "dynamic_cast explicit export friend inline late_check " +[m
+[32m+[m[32m      "mutable namespace nullptr reinterpret_cast static_assert static_cast " +[m
+[32m+[m[32m      "template typeid typename using virtual wchar_t where ";[m
+[32m+[m[32m  var JAVA_KEYWORDS = COMMON_KEYWORDS +[m
+[32m+[m[32m      "abstract boolean byte extends final finally implements import " +[m
+[32m+[m[32m      "instanceof null native package strictfp super synchronized throws " +[m
+[32m+[m[32m      "transient ";[m
+[32m+[m[32m  var CSHARP_KEYWORDS = JAVA_KEYWORDS +[m
+[32m+[m[32m      "as base by checked decimal delegate descending dynamic event " +[m
+[32m+[m[32m      "fixed foreach from group implicit in interface internal into is lock " +[m
+[32m+[m[32m      "object out override orderby params partial readonly ref sbyte sealed " +[m
+[32m+[m[32m      "stackalloc string select uint ulong unchecked unsafe ushort var ";[m
+[32m+[m[32m  var COFFEE_KEYWORDS = "all and by catch class else extends false finally " +[m
+[32m+[m[32m      "for if in is isnt loop new no not null of off on or return super then " +[m
+[32m+[m[32m      "true try unless until when while yes ";[m
+[32m+[m[32m  var JSCRIPT_KEYWORDS = COMMON_KEYWORDS +[m
+[32m+[m[32m      "debugger eval export function get null set undefined var with " +[m
+[32m+[m[32m      "Infinity NaN ";[m
+[32m+[m[32m  var PERL_KEYWORDS = "caller delete die do dump 
