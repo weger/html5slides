@@ -1,7 +1,7 @@
 html5slides
 ===========
 
-A Google HTML5 slide template
+A Google HTML5 slide template   
 
 A newer version of this slide template is availalable at https://code.google.com/p/io-2012-slides/
 
@@ -12,7 +12,7 @@ The 2012 version is mobile friendly, touch enabled, and has shiny new features.
 By Luke Mahé and Marcin Wichary.
 
 ### Demo
-http://html5slides.googlecode.com/svn/trunk/template/index.html
+http://weger.github.io/html5slides
 
 <hr />
 
