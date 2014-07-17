@@ -12,7 +12,7 @@ The 2012 version is mobile friendly, touch enabled, and has shiny new features.
 By Luke Mahé and Marcin Wichary.
 
 ### Demo
-http://weger.github.io/html5slides
+http://weger.github.io/html5slides/template/index.html
 
 <hr />
 
