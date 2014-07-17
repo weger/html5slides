@@ -7,9 +7,9 @@ A newer version of this slide template is availalable at https://code.google.com
 
 ### USE IT!
 The 2012 version is mobile friendly, touch enabled, and has shiny new features.
-<hr />
 
 By Luke Mahé and Marcin Wichary.
+<hr />
 
 ### Demo
 http://weger.github.io/html5slides/template/index.html
